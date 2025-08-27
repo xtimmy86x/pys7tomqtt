@@ -56,7 +56,7 @@ class Attribute:
     def rec_s7_data(self, data: Any) -> None:
         if not self.publish_to_mqtt:
             return
-        if self.type == "REAL" and self.round_value:
+        if self.type == "R" and self.round_value:
             try:
                 data = round(float(data), 3)
             except Exception:

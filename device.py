@@ -76,7 +76,7 @@ class Device:
                     'DBD'  : 'D',
                     'D'    : 'D',
                     'DINT' : 'D',  # INT32
-                    'REAL' : 'D',  # opzionale: trattalo come D se lo gestisci insieme a DWord
+                    'REAL' : 'R',  # opzionale: trattalo come D se lo gestisci insieme a DWord
                     # aggiungi qui altre sigle se nel tuo progetto ne hai
                 }
 
