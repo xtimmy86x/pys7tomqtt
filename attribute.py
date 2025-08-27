@@ -1,4 +1,4 @@
-import time
+import time, logging
 from typing import Any, Callable
 
 
@@ -92,7 +92,7 @@ class Attribute:
 
     def write_to_plc_fn(self, value: Any) -> None:
         self.last_set_data = value
-        self.plc_handler.write_item(self.full_mqtt_topic + "/set", value)
+        self.plc_handler.write_item(self.full_mqtt_topic, value)
 
     def format_message(self, msg: str, plc_type: str, no_debug_out: bool = True):
         if plc_type == "X":

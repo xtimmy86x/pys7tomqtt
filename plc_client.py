@@ -61,7 +61,7 @@ class PlcClient:
             else:  # "B"
                 raw = int(value).to_bytes(1, byteorder="big", signed=False)
 
-            area = snap7.types.Areas.DB if snap7 is not None else 0
+            area = snap7.type.Areas.DB if snap7 is not None else 0
             self._client.write_area(area, db, byte, raw)
         except Exception:  # pragma: no cover - connection/parsing errors
             logging.exception("Failed to write address %s", address)
