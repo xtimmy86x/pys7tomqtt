@@ -26,8 +26,10 @@ def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_bas
     config["mqtt"] = new_mqtt_name
     config["mqtt_base"] = mqtt_base
     config["retain_messages"] = retain_messages
-
-    if type_lower == "light" or "switch":
+    
+    if type_lower == "light":
+        device = LightDevice(plc, mqtt, config)
+    elif type_lower == "switch":
         device = LightDevice(plc, mqtt, config)
     elif type_lower == "sensor":
         device = SensorDevice(plc, mqtt, config)

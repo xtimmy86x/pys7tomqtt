@@ -44,14 +44,57 @@ class Device:
 
         # check type from address
         if attr.plc_address:
-            offset = attr.plc_address.split(',')
+            offset = attr.plc_address.split('.')
+            
             if len(offset) > 1:
-                params = re.findall(r'(\d+|\D+)', offset[1])
-                plc_type = params[0]
+                token = offset[1].strip().upper()  # es: "DB11.X1.0", "DB11.I1", "DB11.DBX1.0", "WORD 4"
+                # rimuovi eventuale prefisso "DB<number>."
+                token = re.sub(r'^DB\d+\.', '', token)  # "DB11.X1.0" -> "X1.0", "DB11.I1" -> "I1"
+                # prendi la prima "parola" alfabetica (DBX, X, I, B, W, D, WORD, DWORD, BOOL, INT, ecc.)
+                m = re.match(r'[A-Z]+', token)
+                if not m:
+                    # niente prefisso alfabetico → non riesco a dedurre il tipo
+                    return
+                head = m.group(0)  # es: "X", "I", "DBX", "WORD", "B", "W", "D", "INT", "DWORD", ...
+                # mapping completo
+                type_map = {
+                    'BOOL': 'X',
+                    'DBX' : 'X',
+                    'X'   : 'X',
+
+                    'BYTE': 'B',
+                    'DBB' : 'B',
+                    'B'   : 'B',
+
+                    'WORD': 'W',
+                    'DBW' : 'W',
+                    'W'   : 'W',
+                    'INT' : 'I',   # INT16
+                    'I'   : 'I',   # shorthand comune per INT → Word
+
+                    'DWORD': 'D',
+                    'DBD'  : 'D',
+                    'D'    : 'D',
+                    'DINT' : 'D',  # INT32
+                    'REAL' : 'D',  # opzionale: trattalo come D se lo gestisci insieme a DWord
+                    # aggiungi qui altre sigle se nel tuo progetto ne hai
+                }
+
+                plc_type = type_map.get(head)
+
+                if not plc_type:
+                    
+                    # fallback: se è qualcosa tipo "DB?" prendi ultima lettera
+                    if head.startswith('DB') and len(head) >= 3:
+                        plc_type = head[-1]  # DBX->X, DBW->W, ecc.
+                    else:
+                        return  # tipo non riconosciuto
                 if required_type and plc_type != required_type:
                     return
+                
                 attr.type = plc_type
         self.attributes[name] = attr
+
 
     def send_discover_msg(self, info: Dict[str, Any] | None = None) -> None:
         info = info or {}

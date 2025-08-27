@@ -1,4 +1,4 @@
-import time, logging
+import time
 from typing import Any, Callable
 
 
@@ -82,21 +82,17 @@ class Attribute:
     # Incoming data from MQTT
     def rec_mqtt_data(self, data: str, cb: Callable[[Any], None] | None = None) -> None:
         res = self.format_message(data, self.type)
-        print(f"DEBUG: input={data}, type={self.type}, res={res}")
         if res[0] == 0:
-            logging.warning("OK")
             self.write_to_plc_fn(res[1])
             if cb:
                 cb(None)
         else:
-            logging.warning("Error")
             if cb:
                 cb("Incorrect formatting")
 
     def write_to_plc_fn(self, value: Any) -> None:
         self.last_set_data = value
         self.plc_handler.write_item(self.full_mqtt_topic, value)
-        logging.warning("Write:", value, self.full_mqtt_topic)
 
     def format_message(self, msg: str, plc_type: str, no_debug_out: bool = True):
         """

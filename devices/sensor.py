@@ -7,16 +7,13 @@ class SensorDevice(Device):
 
     def __init__(self, plc, mqtt, config):
         super().__init__(plc, mqtt, config)
-
         # --- Modalità semplice: un solo stato ---
+        
         if "state" in config:
-            dtype = str(config.get("state_type", "X")).upper()
+            dtype = str(config.get("state_type")).upper()
             if dtype not in VALID_TYPES:
                 raise ValueError(f"state_type non valido: {dtype}. Attesi: {VALID_TYPES}")
+            elif dtype is None:
+                raise ValueError("state_type mancante")
             # nome pubblicato = "state"
-            self._create_attr_safe(
-                addr=config["state"],
-                dtype=dtype,
-                name="state",
-                #opts=config  # passiamo l'intera config per eventuali meta futuri
-            )
+            self.create_attribute(config["state"],dtype,"state")
