@@ -13,7 +13,7 @@ class Device:
         self.mqtt_handler = mqtt
         self.name = config.get("name", "unnamed device")
         self.type = config["type"].lower()
-        self.discovery_topic = config.get("discovery_prefix", "homeassistant")
+        self.discovery_topic = config.get("discovery_prefix", "testha")
         self.discovery_retain = config.get("discovery_retain", False)
         self.retain_messages = config.get("retain_messages", False)
 
