@@ -25,6 +25,9 @@ class PlcClient:
             self._client = snap7.client.Client()
             port = config.get("port", 102)
             self._client.connect(config.get("host"), config.get("rack", 0), config.get("slot", 2), port)
+            logging.info("Connected to PLC at %s:%d", config.get("host"), port)
+        elif self._client is None:
+            logging.warning("snap7 package not available, running in stub mode")
 
     def add_item(self, topic: str, address: str) -> None:
         self._items[topic] = address

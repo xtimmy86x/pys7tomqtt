@@ -1,4 +1,5 @@
 from typing import Callable, Optional
+import logging
 
 try:
     import paho.mqtt.client as mqtt
@@ -22,6 +23,8 @@ class MqttClient:
         self._client = client
         if self._client is None and mqtt is not None:
             self._client = mqtt.Client()
+            logging.info("Connected to MQTT broker at %s:%d", config.get("host", "localhost"), config.get("port", 1883))
+
             if message_callback is not None:
                 def _on_message(client, userdata, msg):
                     message_callback(msg.topic, msg.payload.decode())

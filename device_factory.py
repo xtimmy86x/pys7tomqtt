@@ -4,7 +4,7 @@ from .device import Device
 from .devices import LightDevice, SensorDevice
 
 
-def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_base: str, retain_messages: bool) -> Device:
+def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_base: str, retain_messages: bool, discovery_topic: bool, discovery_retain: bool) -> Device:
     """Create a new device instance based on the configuration.
 
     The implementation mirrors the behaviour of the original Node.js
@@ -26,6 +26,8 @@ def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_bas
     config["mqtt"] = new_mqtt_name
     config["mqtt_base"] = mqtt_base
     config["retain_messages"] = retain_messages
+    config["discovery_topic"] = discovery_topic
+    config["discovery_retain"] = discovery_retain
     
     if type_lower == "light":
         device = LightDevice(plc, mqtt, config)

@@ -1,4 +1,4 @@
-import asyncio
+import asyncio, logging
 import yaml
 from typing import Dict
 
@@ -6,6 +6,8 @@ from .mqtt_client import MqttClient
 from .plc_client import PlcClient
 from .device_factory import device_factory
 
+# only for testing
+logging.basicConfig(level=logging.INFO)
 
 def load_config(path: str) -> Dict:
     with open(path, "r", encoding="utf-8") as f:
@@ -30,13 +32,15 @@ async def main(config_path: str = "config.yaml") -> None:
 
     mqtt = MqttClient(cfg.get("mqtt", {}), message_callback=mqtt_message_factory(devices))
     plc = PlcClient(cfg.get("plc", {}))
+    ha = cfg.get("ha", {})
 
     for dev_cfg in cfg.get("devices", []):
-        dev = device_factory(devices, plc, mqtt, dev_cfg, cfg.get("mqtt_base", "s7"), cfg.get("retain_messages", False))
+        dev = device_factory(devices, plc, mqtt, dev_cfg, cfg.get("mqtt_base", "s7"), cfg.get("retain_messages", False), ha.get("discovery_topic", "hatest"), ha.get("discovery_retain", False))
         devices[dev.mqtt_name] = dev
-        dev.send_discover_msg()
+        if ha.get("discovery", False):
+            dev.send_discover_msg()
 
-    update_time = cfg.get("update_time", 1000) / 1000.0
+    update_time = cfg.get("update_time", 1)
 
     while True:
         readings = plc.read_all()

@@ -9,6 +9,11 @@ plc:
   slot: 1
   port: 102
 
+ha:
+  discovery: true
+  discovery_topic: haaa
+  discovery_retain: false
+
 mqtt_base: test
 retain_messages: false
 update_time: 1000
