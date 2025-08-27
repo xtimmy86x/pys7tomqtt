@@ -1,7 +1,7 @@
 import unittest
-from py.attribute import Attribute
-from py.mqtt_client import MqttClient
-from py.plc_client import PlcClient
+from attribute import Attribute
+from mqtt_client import MqttClient
+from plc_client import PlcClient
 
 class DummyMqtt(MqttClient):
     def __init__(self):
