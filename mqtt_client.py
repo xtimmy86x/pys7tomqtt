@@ -1,4 +1,3 @@
-import json
 from typing import Callable, Optional
 
 try:
