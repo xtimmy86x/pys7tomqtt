@@ -55,7 +55,7 @@ class PlcClientWriteItemTest(unittest.TestCase):
     def test_write_item_translates_and_encodes(self):
         import plc_client as pc
 
-        expected_area = pc.snap7.types.Areas.DB if pc.snap7 is not None else 0
+        expected_area = pc.snap7.type.Areas.DB if pc.snap7 is not None else 0
         cases = [
             ("DB1.DBX0.0", True, 0, bytes([1])),
             ("DB1.DBB1", 7, 1, bytes([7])),
