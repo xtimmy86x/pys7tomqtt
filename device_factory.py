@@ -1,7 +1,7 @@
 from typing import Dict
 
 from .device import Device
-from .devices import LightDevice
+from .devices import LightDevice, SensorDevice
 
 
 def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_base: str, retain_messages: bool) -> Device:
@@ -27,8 +27,10 @@ def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_bas
     config["mqtt_base"] = mqtt_base
     config["retain_messages"] = retain_messages
 
-    if type_lower == "light":
+    if type_lower == "light" or "switch":
         device = LightDevice(plc, mqtt, config)
+    elif type_lower == "sensor":
+        device = SensorDevice(plc, mqtt, config)
     else:
         device = Device(plc, mqtt, config)
     return device
