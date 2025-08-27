@@ -1,0 +1,23 @@
+mqtt:
+  host: localhost
+  user: user
+  password: pass
+
+plc:
+  host: 192.168.0.10
+  rack: 0
+  slot: 2
+  port: 102
+
+mqtt_base: s7
+retain_messages: false
+update_time: 1000
+
+devices:
+  - type: light
+    name: Kitchen Light
+    mqtt: kitchen-light
+    state:
+      plc: "DB1.DBX0.0"
+    brightness:
+      plc: "DB1.DBB1"
