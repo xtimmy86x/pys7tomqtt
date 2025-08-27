@@ -3,7 +3,7 @@ import re
 from typing import Dict, Any
 
 from .attribute import Attribute
-
+from .utils import Utils
 
 class Device:
     """Base class for devices containing multiple attributes."""
@@ -45,8 +45,9 @@ class Device:
         # check type from address
         if attr.plc_address:
             offset = attr.plc_address.split('.')
-            
-            if len(offset) > 1:
+            test = Utils._parse_address(self, attr.plc_address)[1]
+            print(test)
+            if len(offset) > 10:
                 token = offset[1].strip().upper()  # es: "DB11.X1.0", "DB11.I1", "DB11.DBX1.0", "WORD 4"
                 # rimuovi eventuale prefisso "DB<number>."
                 token = re.sub(r'^DB\d+\.', '', token)  # "DB11.X1.0" -> "X1.0", "DB11.I1" -> "I1"
@@ -76,11 +77,11 @@ class Device:
                     'DBD'  : 'D',
                     'D'    : 'D',
                     'DINT' : 'D',  # INT32
-                    'REAL' : 'R',  # opzionale: trattalo come D se lo gestisci insieme a DWord
+                    'REAL' : 'D',  # opzionale: trattalo come D se lo gestisci insieme a DWord
                     # aggiungi qui altre sigle se nel tuo progetto ne hai
                 }
-
-                plc_type = type_map.get(head)
+            if len(offset) > 1:
+                plc_type = test #type_map.get(head)
 
                 if not plc_type:
                     
