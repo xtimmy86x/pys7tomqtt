@@ -61,7 +61,7 @@ class PlcClient:
             try:
                 db, dtype, byte, bit = self._parse_address(address)
                 size = {"X": 1, "B": 1, "W": 2, "D": 4}[dtype]
-                area = snap7.types.Areas.DB if snap7 is not None else 0
+                area = snap7.type.Areas.DB if snap7 is not None else 0
                 raw = self._client.read_area(area, db, byte, size)
 
                 if dtype == "X":
@@ -85,7 +85,7 @@ class PlcClient:
         ``bit_offset`` is zero when not used.
         """
 
-        match = re.fullmatch(r"DB(\d+)\.DB([XBWD])(\d+)(?:\.(\d+))?", address.upper())
+        match = re.fullmatch(r"DB(\d+)\.(?:DB)?([XBWD])(\d+)(?:\.(\d+))?", address.upper())
         if not match:
             raise ValueError(f"Unsupported address format: {address}")
         db = int(match.group(1))
