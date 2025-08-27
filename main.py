@@ -1,5 +1,5 @@
 import asyncio
-import json
+import yaml
 from typing import Dict
 
 from .mqtt_client import MqttClient
@@ -9,7 +9,7 @@ from .device_factory import device_factory
 
 def load_config(path: str) -> Dict:
     with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+        return yaml.safe_load(f)
 
 
 def mqtt_message_factory(devices):
@@ -23,7 +23,7 @@ def mqtt_message_factory(devices):
     return mqtt_message
 
 
-async def main(config_path: str = "config.json") -> None:
+async def main(config_path: str = "config.yaml") -> None:
     cfg = load_config(config_path)
 
     devices: Dict[str, object] = {}
