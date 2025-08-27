@@ -101,7 +101,7 @@ class Device:
         topic = f"{self.discovery_topic}/{self.type}/s7-connector/{self.mqtt_name}/config"
         info["uniq_id"] = f"s7-{self.mqtt_name}"
         self.mqtt_handler.publish(topic, json.dumps(info), retain=self.discovery_retain)
-        print(f"Discovery retain {self.discovery_retain}")
+
     def rec_s7_data(self, attr: str, data: Any) -> None:
         if attr in self.attributes:
             self.attributes[attr].rec_s7_data(data)
