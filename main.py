@@ -23,7 +23,7 @@ def mqtt_message_factory(devices):
     return mqtt_message
 
 
-async def main(config_path: str = "config.example.json") -> None:
+async def main(config_path: str = "config.json") -> None:
     cfg = load_config(config_path)
 
     devices: Dict[str, object] = {}
