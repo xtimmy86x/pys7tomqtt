@@ -1,3 +1,6 @@
+import logging
+import re
+import struct
 from typing import Dict, Any
 
 try:
@@ -35,10 +38,58 @@ class PlcClient:
         self._written[topic] = value
 
     def read_all(self) -> Dict[str, Any]:
-        # When no PLC is connected we just return zero values for all topics so
-        # that the application loop can still run during tests.
-        result = {}
-        for topic in self._items:
-            # Provide previously written values if available, otherwise 0.
-            result[topic] = getattr(self, "_written", {}).get(topic, 0)
+        """Read all configured items from the PLC.
+
+        Each stored address is expected to use the S7 DB notation, e.g.::
+
+            DB1.DBX0.0   # bool
+            DB1.DBW2     # 16-bit int
+            DB1.DBD4     # 32-bit float
+
+        When the snap7 client is not available the method falls back to the
+        in-memory values written via :meth:`write_item` so that tests can run
+        without a real PLC connection.
+        """
+
+        result: Dict[str, Any] = {}
+        for topic, address in self._items.items():
+            if self._client is None:
+                # Provide previously written values if available, otherwise 0.
+                result[topic] = getattr(self, "_written", {}).get(topic, 0)
+                continue
+
+            try:
+                db, dtype, byte, bit = self._parse_address(address)
+                size = {"X": 1, "B": 1, "W": 2, "D": 4}[dtype]
+                area = snap7.types.Areas.DB if snap7 is not None else 0
+                raw = self._client.read_area(area, db, byte, size)
+
+                if dtype == "X":
+                    result[topic] = bool(raw[0] & (1 << bit))
+                elif dtype == "D":
+                    # Treat double word as float for simplicity
+                    result[topic] = struct.unpack(">f", raw)[0]
+                elif dtype == "W":
+                    result[topic] = int.from_bytes(raw, byteorder="big", signed=True)
+                else:  # "B"
+                    result[topic] = raw[0]
+            except Exception:  # pragma: no cover - connection/parsing errors
+                logging.exception("Failed to read address %s", address)
         return result
+
+    @staticmethod
+    def _parse_address(address: str) -> tuple[int, str, int, int]:
+        """Parse an S7 DB address.
+
+        Returns a tuple of ``(db_number, data_type, byte_offset, bit_offset)``.
+        ``bit_offset`` is zero when not used.
+        """
+
+        match = re.fullmatch(r"DB(\d+)\.DB([XBWD])(\d+)(?:\.(\d+))?", address.upper())
+        if not match:
+            raise ValueError(f"Unsupported address format: {address}")
+        db = int(match.group(1))
+        dtype = match.group(2)
+        byte = int(match.group(3))
+        bit = int(match.group(4) or 0)
+        return db, dtype, byte, bit
