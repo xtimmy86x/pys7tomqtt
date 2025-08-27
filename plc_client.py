@@ -30,12 +30,41 @@ class PlcClient:
         self._items[topic] = address
 
     def write_item(self, topic: str, value: Any) -> None:
-        # In the stub implementation we simply store the value so tests can
-        # assert on it.  A full implementation would translate the address and
-        # forward the write to the underlying snap7 client.
+        """Write a single item to the PLC.
+
+        The method always stores the value in an in-memory dictionary so that
+        :meth:`read_all` can fall back to it when the real ``snap7`` package is
+        unavailable (e.g. during tests).  When a snap7 client is present the
+        address for the given topic is translated and forwarded to
+        ``write_area``.
+        """
+
         if not hasattr(self, "_written"):
             self._written = {}
         self._written[topic] = value
+
+        if self._client is None:
+            return
+
+        address = self._items.get(topic)
+        if address is None:  # pragma: no cover - misconfiguration
+            return
+
+        try:
+            db, dtype, byte, bit = self._parse_address(address)
+            if dtype == "X":
+                raw = bytes([(1 << bit) if value else 0])
+            elif dtype == "D":
+                raw = struct.pack(">f", float(value))
+            elif dtype == "W":
+                raw = int(value).to_bytes(2, byteorder="big", signed=True)
+            else:  # "B"
+                raw = int(value).to_bytes(1, byteorder="big", signed=False)
+
+            area = snap7.types.Areas.DB if snap7 is not None else 0
+            self._client.write_area(area, db, byte, raw)
+        except Exception:  # pragma: no cover - connection/parsing errors
+            logging.exception("Failed to write address %s", address)
 
     def read_all(self) -> Dict[str, Any]:
         """Read all configured items from the PLC.
