@@ -1,22 +1,22 @@
 mqtt:
-  host: localhost
-  user: user
-  password: pass
+  host: 192.168.1.1
+  user: s7garage
+  password: s7garage
 
 plc:
-  host: 192.168.0.10
+  host: 192.168.1.2
   rack: 0
-  slot: 2
+  slot: 1
   port: 102
 
-mqtt_base: s7
+mqtt_base: test
 retain_messages: false
 update_time: 1000
 
 devices:
   - type: light
-    name: Kitchen Light
-    mqtt: kitchen-light
+    name: test
+    mqtt: test
     state:
       plc: "DB1.DBX0.0"
     brightness:
