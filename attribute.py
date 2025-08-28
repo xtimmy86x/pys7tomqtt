@@ -22,6 +22,7 @@ class Attribute:
         self.boolean_inverted = False
         self.round_value = True
         self.write_back = False
+        self.unit_of_measurement: str | None = None
 
         self.last_update = 0.0
         self.last_value: Any = None

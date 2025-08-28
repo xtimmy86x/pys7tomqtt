@@ -101,6 +101,31 @@ class Device:
         info = info or {}
         topic = f"{self.discovery_topic}/{self.type}/s7-connector/{self.mqtt_name}/config"
         info["uniq_id"] = f"s7-{self.mqtt_name}"
+        info["name"] = self.name
+        info["command_topic"] = f"{self.full_mqtt_topic}/state/set"
+        info["state_topic"] = f"{self.full_mqtt_topic}/state"
+        info["state_on"] = "ON"
+        info["state_off"] = "OFF"
+        info["payload_on"] = "ON"
+        info["payload_off"] = "OFF"
+        info["availability_topic"] = f"{self.full_mqtt_topic}/availability"
+        info["payload_available"] = "online"
+        info["payload_not_available"] = "offline"
+
+            
+        if self.attributes:
+            info["json_attributes_topic"] = f"{self.full_mqtt_topic}/attributes"
+            info["json_attributes_template"] = "{{ value_json | tojson }}"
+            attr_info = {}
+            for attr_name, attr in self.attributes.items():
+                info["unit_of_measurement"] = attr.unit_of_measurement
+                attr_info[attr_name] = {
+                    "plc_address": attr.plc_address,
+                    "set_plc_address": (attr.plc_set_address or attr.plc_address),
+                    "type": attr.type,
+                }
+            info["attributes_info"] = attr_info
+
         self.mqtt_handler.publish(topic, json.dumps(info), retain=self.discovery_retain)
 
     def rec_s7_data(self, attr: str, data: Any) -> None:
