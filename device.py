@@ -46,7 +46,6 @@ class Device:
         if attr.plc_address:
             offset = attr.plc_address.split('.')
             test = Utils._parse_address(self, attr.plc_address)[1]
-            print(test)
             if len(offset) > 10:
                 token = offset[1].strip().upper()  # es: "DB11.X1.0", "DB11.I1", "DB11.DBX1.0", "WORD 4"
                 # rimuovi eventuale prefisso "DB<number>."
