@@ -127,7 +127,7 @@ class Attribute:
                 return False
             return None
 
-        t = self.parsed_plc_address.dtype
+        t = plc_type
         s = (msg or "").strip()
 
         # Tipi supportati: X, B, W/I, D, R

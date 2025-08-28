@@ -1,6 +1,7 @@
 import unittest
 import pys7tomqtt.plc_client as pc
 pc.snap7 = None
+
 from pys7tomqtt.devices.sensor import SensorDevice
 from pys7tomqtt.mqtt_client import MqttClient
 from pys7tomqtt.plc_client import PlcClient

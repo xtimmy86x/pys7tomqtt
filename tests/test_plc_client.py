@@ -3,6 +3,7 @@ import unittest
 
 import pys7tomqtt.plc_client as pc
 pc.snap7 = None
+
 from pys7tomqtt.plc_client import PlcClient
 
 
