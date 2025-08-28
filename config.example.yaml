@@ -26,3 +26,16 @@ devices:
       plc: "DB1.DBX0.0"
     brightness:
       plc: "DB1.DBB1"
+  - type: switch
+    name: test2
+    mqtt: test2
+    state:
+      plc: "DB58.X0.5"
+      set_plc: "DB58.X0.7"
+      rw: rw
+  - type: sensor
+    name: test_int
+    mqtt: test_int
+    state:
+      plc: "DB58.I2"
+      unit_of_measurement: "W"
