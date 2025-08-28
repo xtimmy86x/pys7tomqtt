@@ -21,20 +21,23 @@ class MqttClient:
         self._published = []  # type: list[tuple[str, str, bool]]
         self._subscriptions = []
         self._client = client
-        if self._client is None and mqtt is not None:
+        
+        if self._client is None and mqtt is not None and config.get("host"): # aggiunto controllo host
             self._client = mqtt.Client()
-            logging.info("Connected to MQTT broker at %s:%d", config.get("host", "localhost"), config.get("port", 1883))
 
             if message_callback is not None:
                 def _on_message(client, userdata, msg):
                     message_callback(msg.topic, msg.payload.decode())
                 self._client.on_message = _on_message
+
             if config.get("user"):
                 self._client.username_pw_set(config.get("user"), config.get("password"))
+            
             host = config.get("host", "localhost")
-            self._client.connect(host)
+            port = config.get("port", 1883) # aggiunto porta e default 1883
+            self._client.connect(host,port)
             self._client.loop_start()
-
+            logging.info("Connected to MQTT broker at %s:%d", host, port)
     # API compatible with mqtt_handler.js
     def publish(self, topic: str, payload: str, retain: bool = False) -> None:
         if self._client is not None:
@@ -54,6 +57,11 @@ class MqttClient:
         else:  # pragma: no cover - used in tests
             if topic in self._subscriptions:
                 self._subscriptions.remove(topic)
+
+    def disconnect(self) -> None:
+        if self._client is not None:
+            self._client.loop_stop()
+            self._client.disconnect()
 
     # Helpers for tests
     @property

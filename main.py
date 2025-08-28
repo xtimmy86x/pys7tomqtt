@@ -6,8 +6,7 @@ from .mqtt_client import MqttClient
 from .plc_client import PlcClient
 from .device_factory import device_factory
 
-# only for testing
-# logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO) # Uncomment for debugging
 
 def load_config(path: str) -> Dict:
     with open(path, "r", encoding="utf-8") as f:
