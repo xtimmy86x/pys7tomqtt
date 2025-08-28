@@ -28,7 +28,7 @@ def device_factory(devices: Dict[str, Device], plc, mqtt, config: dict, mqtt_bas
     config["retain_messages"] = retain_messages
     config["discovery_topic"] = discovery_topic
     config["discovery_retain"] = discovery_retain
-    
+
     if type_lower == "light":
         device = LightDevice(plc, mqtt, config)
     elif type_lower == "switch":
