@@ -29,9 +29,7 @@ class Attribute:
         self.update_interval = 0  # ms
         self._subscribed_set = False
         self.set_RW("r")
-        #if self.write_to_plc:
-        #    print("write_to_plc true")
-        #    self.mqtt_handler.subscribe(self.full_mqtt_topic + "/set")
+
         self.subscribe_plc_updates()
 
     def subscribe_plc_updates(self) -> None:
@@ -45,13 +43,10 @@ class Attribute:
         if self.write_to_plc and not self._subscribed_set:
             self.mqtt_handler.subscribe(topic_set)
             self._subscribed_set = True
-            print(f"Subscribed to {topic_set}")
         elif not self.write_to_plc and self._subscribed_set:
-            # Se la tua libreria supporta unsubscribe, usalo:
             if hasattr(self.mqtt_handler, "unsubscribe"):
                 self.mqtt_handler.unsubscribe(topic_set)
             self._subscribed_set = False
-            print(f"Unsubscribed from {topic_set}")
 
     def set_RW(self, mode: str) -> None:
         mode = mode.lower()
