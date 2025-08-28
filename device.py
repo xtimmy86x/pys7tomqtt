@@ -48,6 +48,10 @@ class Device:
                 return
             if required_type and dtype != required_type:
                 return
+            if dtype != "X" and bit != 0:
+                raise ValueError(f"Bit offset non ammesso per {dtype}: bit={bit}")
+            if dtype == "X" and not (0 <= bit <= 7):
+                raise ValueError(f"Bit offset fuori range (0-7): {bit}")
             attr.type = dtype
             attr.parsed_plc_address = ParsedAddress(attr.plc_address, db, dtype, byte, bit)
             attr.subscribe_plc_updates()
