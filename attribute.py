@@ -5,18 +5,16 @@ from typing import Any, Callable
 class Attribute:
     """Represents a single value on the PLC exposed via MQTT."""
 
-    def __init__(self, plc, mqtt, name: str, plc_type: str, mqtt_device_topic: str, retain_messages: bool = False):
+    def __init__(self, plc, mqtt, name: str, mqtt_device_topic: str, retain_messages: bool = False):
         self.plc_handler = plc
         self.mqtt_handler = mqtt
         self.name = name
-        self.type = plc_type
         self.full_mqtt_topic = f"{mqtt_device_topic}/{name}"
         self.retain_messages = bool(retain_messages)
 
         self.plc_address: str | None = None
         self.plc_set_address: str | None = None
         self.parsed_plc_address = None
-
         self.publish_to_mqtt = True
         self.write_to_plc = True
         self.is_internal = False
@@ -60,12 +58,12 @@ class Attribute:
     def rec_s7_data(self, data: Any) -> None:
         if not self.publish_to_mqtt:
             return
-        if self.type == "R" and self.round_value:
+        if self.parsed_plc_address.dtype == "R" and self.round_value:
             try:
                 data = round(float(data), 3)
             except Exception:
                 pass
-        if self.type == "X" and self.boolean_inverted:
+        if self.parsed_plc_address.dtype == "X" and self.boolean_inverted:
             data = not bool(data)
         now = time.monotonic() * 1000
         should_update = False

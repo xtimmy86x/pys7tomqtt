@@ -23,8 +23,8 @@ class Device:
 
         self.attributes: Dict[str, Attribute] = {}
 
-    def create_attribute(self, config: Any, required_type: str, name: str) -> None:
-        attr = Attribute(self.plc_handler, self.mqtt_handler, name, required_type, self.full_mqtt_topic, self.retain_messages)
+    def create_attribute(self, config: Any, name: str) -> None:
+        attr = Attribute(self.plc_handler, self.mqtt_handler, name, self.full_mqtt_topic, self.retain_messages)
 
         if isinstance(config, dict):
             attr.plc_address = config.get("plc")
@@ -46,8 +46,6 @@ class Device:
             try:
                 db, dtype, byte, bit = Utils()._parse_address(attr.plc_address)
             except ValueError:
-                return
-            if required_type and dtype != required_type:
                 return
             if dtype != "X" and bit != 0:
                 raise ValueError(f"Bit offset non ammesso per {dtype}: bit={bit}")
@@ -110,4 +108,3 @@ class Device:
         if not a:
             return None
         return a.plc_set_address or a.plc_address
-    

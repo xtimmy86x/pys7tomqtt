@@ -12,5 +12,5 @@ class SensorDevice(Device):
             if not address:
                 raise ValueError("state requires a plc address")
 
-            self.create_attribute(state_cfg, None,"state")
+            self.create_attribute(state_cfg,"state")
             
