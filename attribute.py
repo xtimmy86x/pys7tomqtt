@@ -17,7 +17,7 @@ class Attribute:
         self.plc_set_address: str | None = None
         self.parsed_plc_address = None
         self.publish_to_mqtt = True
-        self.write_to_plc = True
+        self.write_to_plc = False
         self.is_internal = False
         self.boolean_inverted = False
         self.round_value = True
@@ -27,9 +27,11 @@ class Attribute:
         self.last_update = 0.0
         self.last_value: Any = None
         self.update_interval = 0  # ms
-
-        if self.write_to_plc:
-            self.mqtt_handler.subscribe(self.full_mqtt_topic + "/set")
+        self._subscribed_set = False
+        self.set_RW("r")
+        #if self.write_to_plc:
+        #    print("write_to_plc true")
+        #    self.mqtt_handler.subscribe(self.full_mqtt_topic + "/set")
         self.subscribe_plc_updates()
 
     def subscribe_plc_updates(self) -> None:
@@ -37,6 +39,19 @@ class Attribute:
             self.plc_handler.add_item(self.full_mqtt_topic, self.parsed_plc_address)
         elif self.plc_address:
             self.plc_handler.add_item(self.full_mqtt_topic, self.plc_address)
+    def _update_set_subscription(self) -> None:
+        """Gestisce subscribe/unsubscribe a <topic>/set in base a write_to_plc."""
+        topic_set = self.full_mqtt_topic + "/set"
+        if self.write_to_plc and not self._subscribed_set:
+            self.mqtt_handler.subscribe(topic_set)
+            self._subscribed_set = True
+            print(f"Subscribed to {topic_set}")
+        elif not self.write_to_plc and self._subscribed_set:
+            # Se la tua libreria supporta unsubscribe, usalo:
+            if hasattr(self.mqtt_handler, "unsubscribe"):
+                self.mqtt_handler.unsubscribe(topic_set)
+            self._subscribed_set = False
+            print(f"Unsubscribed from {topic_set}")
 
     def set_RW(self, mode: str) -> None:
         mode = mode.lower()
@@ -53,6 +68,8 @@ class Attribute:
         else:
             self.write_to_plc = True
             self.publish_to_mqtt = True
+
+        self._update_set_subscription()
 
     # Incoming data from PLC
     def rec_s7_data(self, data: Any) -> None:
