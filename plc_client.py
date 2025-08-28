@@ -1,6 +1,6 @@
 import logging
-import re
 import struct
+from dataclasses import dataclass
 from typing import Dict, Any
 from .utils import Utils
 
@@ -9,6 +9,13 @@ try:
 except Exception:  # pragma: no cover - dependency may be missing
     snap7 = None
 
+@dataclass
+class ParsedAddress:
+    address: str
+    db: int
+    dtype: str
+    byte: int
+    bit: int
 
 class PlcClient:
     """Minimal wrapper around python-snap7.
@@ -21,7 +28,7 @@ class PlcClient:
 
     def __init__(self, config: dict, client=None):
         self._client = client
-        self._items: Dict[str, str] = {}
+        self._items: Dict[str, ParsedAddress] = {}
         if self._client is None and snap7 is not None:
             self._client = snap7.client.Client()
             port = config.get("port", 102)
@@ -30,8 +37,16 @@ class PlcClient:
         elif self._client is None:
             logging.warning("snap7 package not available, running in stub mode")
 
-    def add_item(self, topic: str, address: str) -> None:
-        self._items[topic] = address
+    def add_item(self, topic: str, address: ParsedAddress | str) -> None:
+        if isinstance(address, ParsedAddress):
+            self._items[topic] = address
+            return
+        try:
+            db, dtype, byte, bit = Utils()._parse_address(address)
+            self._items[topic] = ParsedAddress(address, db, dtype, byte, bit)
+        except ValueError:
+            # Store placeholder; parsing will be attempted when used
+            self._items[topic] = ParsedAddress(address, 0, "", 0, 0)
 
     def write_item(self, topic: str, value: Any) -> None:
         """Write a single item to the PLC.
@@ -50,13 +65,16 @@ class PlcClient:
         if self._client is None:
             return
 
-        address = self._items.get(topic)
-        if address is None:  # pragma: no cover - misconfiguration
+        item = self._items.get(topic)
+        if item is None:  # pragma: no cover - misconfiguration
             return
 
         try:
-            db, dtype, byte, bit = Utils._parse_address(self, address)
-            dt = dtype  # already upper() in _parse_address
+            if not item.dtype:
+                db, dtype, byte, bit = Utils()._parse_address(item.address)
+                item.db, item.dtype, item.byte, item.bit = db, dtype, byte, bit
+            db, dtype, byte, bit = item.db, item.dtype, item.byte, item.bit
+            dt = dtype
 
             area = snap7.type.Areas.DB if snap7 is not None else 0
 
@@ -68,7 +86,7 @@ class PlcClient:
                     if current and len(current) >= 1:
                         existing_byte = current[0]
                 except Exception:
-                    logging.debug("Impossibile leggere il byte esistente per %s, procedo con 0.", address)
+                    logging.debug("Impossibile leggere il byte esistente per %s, procedo con 0.", item.address)
                 if not (0 <= bit <= 7):
                     raise ValueError(f"bit fuori range (0..7): {bit}")
                 if value:
@@ -82,8 +100,11 @@ class PlcClient:
                 # INT16 signed
                 raw = int(value).to_bytes(2, byteorder="big", signed=True)
             elif dt == "D":
-                # DWORD unsigned 32
-                raw = int(value).to_bytes(4, byteorder="big", signed=False)
+                # DWORD unsigned 32 or float when value is float
+                if isinstance(value, float):
+                    raw = struct.pack(">f", float(value))
+                else:
+                    raw = int(value).to_bytes(4, byteorder="big", signed=False)
             elif dt == "R":
                 # REAL float32
                 raw = struct.pack(">f", float(value))
@@ -91,7 +112,7 @@ class PlcClient:
                 raise ValueError(f"Tipo non supportato: {dtype}")
             self._client.write_area(area, db, byte, raw)
         except Exception:  # pragma: no cover - connection/parsing errors
-            logging.exception("Failed to write address %s", address)
+            logging.exception("Failed to write address %s", item.address)
 
     def read_all(self) -> Dict[str, Any]:
         """Read all configured items from the PLC.
@@ -108,14 +129,17 @@ class PlcClient:
         """
 
         result: Dict[str, Any] = {}
-        for topic, address in self._items.items():
+        for topic, item in self._items.items():
             if self._client is None:
                 # Provide previously written values if available, otherwise 0.
                 result[topic] = getattr(self, "_written", {}).get(topic, 0)
                 continue
 
             try:
-                db, dtype, byte, bit = Utils._parse_address(self, address)
+                if not item.dtype:
+                    db, dtype, byte, bit = Utils()._parse_address(item.address)
+                    item.db, item.dtype, item.byte, item.bit = db, dtype, byte, bit
+                db, dtype, byte, bit = item.db, item.dtype, item.byte, item.bit
                 size = {
                     "X": 1,  # indirizzabile a byte
                     "B": 1,
@@ -140,6 +164,6 @@ class PlcClient:
                 else:
                     raise ValueError(f"Tipo non supportato: {dtype}")
             except Exception:  # pragma: no cover - connection/parsing errors
-                logging.exception("Failed to read address %s", address)
+                logging.exception("Failed to read address %s", item.address)
         return result
 

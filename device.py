@@ -1,9 +1,9 @@
 import json
-import re
 from typing import Dict, Any
 
 from .attribute import Attribute
 from .utils import Utils
+from .plc_client import ParsedAddress
 
 class Device:
     """Base class for devices containing multiple attributes."""
@@ -40,59 +40,20 @@ class Device:
                 attr.write_back = config["write_back"]
         else:
             attr.plc_address = config
-        attr.subscribe_plc_updates()
 
-        # check type from address
         if attr.plc_address:
-            offset = attr.plc_address.split('.')
-            test = Utils._parse_address(self, attr.plc_address)[1]
-            if len(offset) > 10:
-                token = offset[1].strip().upper()  # es: "DB11.X1.0", "DB11.I1", "DB11.DBX1.0", "WORD 4"
-                # rimuovi eventuale prefisso "DB<number>."
-                token = re.sub(r'^DB\d+\.', '', token)  # "DB11.X1.0" -> "X1.0", "DB11.I1" -> "I1"
-                # prendi la prima "parola" alfabetica (DBX, X, I, B, W, D, WORD, DWORD, BOOL, INT, ecc.)
-                m = re.match(r'[A-Z]+', token)
-                if not m:
-                    # niente prefisso alfabetico → non riesco a dedurre il tipo
-                    return
-                head = m.group(0)  # es: "X", "I", "DBX", "WORD", "B", "W", "D", "INT", "DWORD", ...
-                # mapping completo
-                type_map = {
-                    'BOOL': 'X',
-                    'DBX' : 'X',
-                    'X'   : 'X',
+            try:
+                db, dtype, byte, bit = Utils()._parse_address(attr.plc_address)
+            except ValueError:
+                return
+            if required_type and dtype != required_type:
+                return
+            attr.type = dtype
+            attr.parsed_plc_address = ParsedAddress(attr.plc_address, db, dtype, byte, bit)
+            attr.subscribe_plc_updates()
+        else:
+            attr.subscribe_plc_updates()
 
-                    'BYTE': 'B',
-                    'DBB' : 'B',
-                    'B'   : 'B',
-
-                    'WORD': 'W',
-                    'DBW' : 'W',
-                    'W'   : 'W',
-                    'INT' : 'I',   # INT16
-                    'I'   : 'I',   # shorthand comune per INT → Word
-
-                    'DWORD': 'D',
-                    'DBD'  : 'D',
-                    'D'    : 'D',
-                    'DINT' : 'D',  # INT32
-                    'REAL' : 'D',  # opzionale: trattalo come D se lo gestisci insieme a DWord
-                    # aggiungi qui altre sigle se nel tuo progetto ne hai
-                }
-            if len(offset) > 1:
-                plc_type = test #type_map.get(head)
-
-                if not plc_type:
-                    
-                    # fallback: se è qualcosa tipo "DB?" prendi ultima lettera
-                    if head.startswith('DB') and len(head) >= 3:
-                        plc_type = head[-1]  # DBX->X, DBW->W, ecc.
-                    else:
-                        return  # tipo non riconosciuto
-                if required_type and plc_type != required_type:
-                    return
-                
-                attr.type = plc_type
         self.attributes[name] = attr
 
 

@@ -15,6 +15,7 @@ class Attribute:
 
         self.plc_address: str | None = None
         self.plc_set_address: str | None = None
+        self.parsed_plc_address = None
 
         self.publish_to_mqtt = True
         self.write_to_plc = True
@@ -34,7 +35,9 @@ class Attribute:
         self.subscribe_plc_updates()
 
     def subscribe_plc_updates(self) -> None:
-        if self.plc_address:
+        if self.parsed_plc_address:
+            self.plc_handler.add_item(self.full_mqtt_topic, self.parsed_plc_address)
+        elif self.plc_address:
             self.plc_handler.add_item(self.full_mqtt_topic, self.plc_address)
 
     def set_RW(self, mode: str) -> None:
