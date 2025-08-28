@@ -9,6 +9,7 @@ class Attribute:
         self.plc_handler = plc
         self.mqtt_handler = mqtt
         self.name = name
+        self.mqtt_device_topic = mqtt_device_topic
         self.full_mqtt_topic = f"{mqtt_device_topic}/{name}"
         self.retain_messages = bool(retain_messages)
 
@@ -28,8 +29,7 @@ class Attribute:
         self.update_interval = 0  # ms
 
         if self.write_to_plc:
-            self.mqtt_handler.subscribe(self.full_mqtt_topic + "/set")
-
+            self.mqtt_handler.subscribe(self.mqtt_device_topic + "/set")
         self.subscribe_plc_updates()
 
     def subscribe_plc_updates(self) -> None:
@@ -94,7 +94,7 @@ class Attribute:
 
     def write_to_plc_fn(self, value: Any) -> None:
         self.last_set_data = value
-        self.plc_handler.write_item(self.full_mqtt_topic, value)
+        self.plc_handler.write_item(self.mqtt_device_topic, value)
 
     def format_message(self, msg: str, plc_type: str, no_debug_out: bool = True):
         """
