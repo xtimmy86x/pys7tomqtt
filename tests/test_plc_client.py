@@ -1,7 +1,9 @@
 import struct
 import unittest
 
-from plc_client import PlcClient
+import pys7tomqtt.plc_client as pc
+pc.snap7 = None
+from pys7tomqtt.plc_client import PlcClient
 
 
 class FakeSnap7Client:
@@ -35,7 +37,7 @@ class PlcClientReadAllTest(unittest.TestCase):
         plc = PlcClient({}, client=client)
         plc.add_item("bool/topic", "DB1.DBX0.0")
         plc.add_item("int/topic", "DB1.DBW2")
-        plc.add_item("float/topic", "DB1.DBD4")
+        plc.add_item("float/topic", "DB1.DBR4")
         result = plc.read_all()
         self.assertTrue(result["bool/topic"])
         self.assertEqual(result["int/topic"], 123)
@@ -53,7 +55,7 @@ class PlcClientReadAllTest(unittest.TestCase):
 
 class PlcClientWriteItemTest(unittest.TestCase):
     def test_write_item_translates_and_encodes(self):
-        import plc_client as pc
+        import  pys7tomqtt.plc_client as pc
 
         expected_area = pc.snap7.type.Areas.DB if pc.snap7 is not None else 0
         cases = [

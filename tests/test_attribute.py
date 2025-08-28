@@ -1,7 +1,9 @@
 import unittest
-from attribute import Attribute
-from mqtt_client import MqttClient
-from plc_client import PlcClient
+import pys7tomqtt.plc_client as pc
+pc.snap7 = None
+from pys7tomqtt.attribute import Attribute
+from pys7tomqtt.mqtt_client import MqttClient
+from pys7tomqtt.plc_client import PlcClient
 
 class DummyMqtt(MqttClient):
     def __init__(self):

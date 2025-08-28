@@ -1,21 +1,20 @@
 from ..device import Device
 from ..utils import Utils
 
-VALID_TYPES = {"X", "B", "R", "DR", "I", "DI", "W", "DW", "D"}
-
 class SensorDevice(Device):
     """Simple sensor device exposing a state."""
 
     def __init__(self, plc, mqtt, config):
         super().__init__(plc, mqtt, config)
         # --- Modalità semplice: un solo stato ---
-        print(f"Config sensor: {config}")
         if "state" in config:
-            dtype = str(config.get("state_type")).upper()
-            if dtype not in VALID_TYPES:
-                raise ValueError(f"state_type non valido: {dtype}. Attesi: {VALID_TYPES}")
-            # elif dtype == "NONE":
-            #    raise ValueError("state_type mancante")
-            # nome pubblicato = "state"
-            self.create_attribute(config["state"],dtype,"state")
+
+            state_cfg = config["state"]
+            address = state_cfg.get("plc") if isinstance(state_cfg, dict) else state_cfg
+            if not address:
+                raise ValueError("state requires a plc address")
+            # Deduce the data type directly from the PLC address
+            dtype = Utils()._parse_address(address)[1]
+
+            self.create_attribute(state_cfg,dtype,"state")
             

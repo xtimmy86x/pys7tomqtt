@@ -1,8 +1,10 @@
 import sys
 from pathlib import Path
 
-# Ensure project root is on the Python path when running tests directly from
-# this repository.  The package contains an ``__init__`` at the root which would
-# otherwise require imports like ``pys7tomqtt.attribute`` in the tests.
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+# Ensure the package root is importable as ``pys7tomqtt`` when running tests
+# directly from this repository.
+# ``Path(__file__).resolve().parent`` -> tests/
+#                          .parent   -> project root (pys7tomqtt/)
+#                          .parent   -> repository root containing the package
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
