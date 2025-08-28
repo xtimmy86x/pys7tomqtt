@@ -52,7 +52,6 @@ async def main(config_path: str = "config.yaml") -> None:
 
 
 if __name__ == "__main__":
-    # asyncio.run(main())
     #logging.basicConfig(level=logging.INFO) # Uncomment for debugging 
     try:
         asyncio.run(main())

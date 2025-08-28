@@ -127,19 +127,7 @@ class Attribute:
                 return False
             return None
 
-        # Normalizza tipo con alias comuni
-        t = (plc_type or "").strip().upper()
-        alias_map = {
-            "BOOL": "X",
-            "BYTE": "B",
-            "WORD": "W",
-            "INT":  "I",
-            "DWORD":"D",
-            "REAL": "R",
-        }
-        t = alias_map.get(t, t)  # mappa alias → tipo base
-
-        # Pulisci msg
+        t = self.parsed_plc_address.dtype
         s = (msg or "").strip()
 
         # Tipi supportati: X, B, W/I, D, R
