@@ -63,7 +63,7 @@ class Attribute:
                 pass
         if self.type == "X" and self.boolean_inverted:
             data = not bool(data)
-        now = time.time() * 1000
+        now = time.monotonic() * 1000
         should_update = False
         if self.update_interval:
             should_update = (now - self.last_update) > self.update_interval
