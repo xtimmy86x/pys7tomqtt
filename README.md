@@ -12,12 +12,9 @@ pip install -r requirements.txt
 
 ## Configuration
 
-The application now uses a YAML configuration file.  The default file is
+The application uses a YAML configuration file.  The default file is
 `config.yaml`; an example configuration is available in
 `config.example.yaml`.
-
-To migrate from older versions using `config.json`, rename the file to
-`config.yaml` and adapt the contents to YAML syntax.
 
 ## Running
 
