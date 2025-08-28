@@ -25,6 +25,7 @@ class Device:
 
     def create_attribute(self, config: Any, required_type: str, name: str) -> None:
         attr = Attribute(self.plc_handler, self.mqtt_handler, name, required_type, self.full_mqtt_topic, self.retain_messages)
+
         if isinstance(config, dict):
             attr.plc_address = config.get("plc")
             attr.plc_set_address = config.get("set_plc")

@@ -7,7 +7,7 @@ class LightDevice(Device):
     def __init__(self, plc, mqtt, config):
         super().__init__(plc, mqtt, config)
         if "state" in config:
-            self.create_attribute(config["state"], "X", "state")
+            self.create_attribute(config["state"], None, "state")
         if "brightness" in config:
             self.create_attribute(config["brightness"], "BYTE", "brightness")
             
