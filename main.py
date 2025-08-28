@@ -6,8 +6,6 @@ from .mqtt_client import MqttClient
 from .plc_client import PlcClient
 from .device_factory import device_factory
 
-# logging.basicConfig(level=logging.INFO) # Uncomment for debugging
-
 def load_config(path: str) -> Dict:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -54,4 +52,9 @@ async def main(config_path: str = "config.yaml") -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # asyncio.run(main())
+    # logging.basicConfig(level=logging.INFO) # Uncomment for debugging
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        pass
