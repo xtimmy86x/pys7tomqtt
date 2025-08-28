@@ -65,16 +65,10 @@ class Device:
         topic = f"{self.discovery_topic}/{self.type}/s7-connector/{self.mqtt_name}/config"
         info["uniq_id"] = f"s7-{self.mqtt_name}"
         info["name"] = self.name
-        info["command_topic"] = f"{self.full_mqtt_topic}/state/set"
-        info["state_topic"] = f"{self.full_mqtt_topic}/state"
-        info["state_on"] = "ON"
-        info["state_off"] = "OFF"
-        info["payload_on"] = "ON"
-        info["payload_off"] = "OFF"
+        
         info["availability_topic"] = f"{self.full_mqtt_topic}/availability"
         info["payload_available"] = "online"
         info["payload_not_available"] = "offline"
-
             
         if self.attributes:
             info["json_attributes_topic"] = f"{self.full_mqtt_topic}/attributes"
@@ -82,6 +76,14 @@ class Device:
             attr_info = {}
             for attr_name, attr in self.attributes.items():
                 info["unit_of_measurement"] = attr.unit_of_measurement
+                if attr.write_to_plc:
+                    info["command_topic"] = f"{self.full_mqtt_topic}/state/set"
+                    info["payload_on"] = "True"
+                    info["payload_off"] = "False"
+                if attr.publish_to_mqtt:
+                    info["state_topic"] = f"{self.full_mqtt_topic}/state"
+                    info["state_on"] = "True"
+                    info["state_off"] = "False"
                 attr_info[attr_name] = {
                     "plc_address": attr.plc_address,
                     "set_plc_address": (attr.plc_set_address or attr.plc_address),
