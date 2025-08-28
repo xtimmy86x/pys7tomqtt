@@ -143,4 +143,3 @@ class PlcClient:
                 logging.exception("Failed to read address %s", address)
         return result
 
-

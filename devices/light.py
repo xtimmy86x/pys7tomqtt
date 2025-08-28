@@ -10,3 +10,4 @@ class LightDevice(Device):
             self.create_attribute(config["state"], "X", "state")
         if "brightness" in config:
             self.create_attribute(config["brightness"], "BYTE", "brightness")
+            

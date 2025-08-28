@@ -71,3 +71,4 @@ class MqttClient:
     @property
     def subscriptions(self):
         return list(self._subscriptions)
+    

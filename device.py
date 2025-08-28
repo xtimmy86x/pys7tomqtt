@@ -120,3 +120,4 @@ class Device:
         if not a:
             return None
         return a.plc_set_address or a.plc_address
+    

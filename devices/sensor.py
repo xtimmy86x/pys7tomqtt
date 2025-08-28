@@ -17,3 +17,4 @@ class SensorDevice(Device):
                 raise ValueError("state_type mancante")
             # nome pubblicato = "state"
             self.create_attribute(config["state"],dtype,"state")
+            

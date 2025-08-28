@@ -37,3 +37,4 @@ class Utils:
                 dtype = "R"
 
             return db, dtype, byte, bit
+    
