@@ -29,7 +29,7 @@ class Attribute:
         self.update_interval = 0  # ms
 
         if self.write_to_plc:
-            self.mqtt_handler.subscribe(self.mqtt_device_topic + "/set")
+            self.mqtt_handler.subscribe(self.full_mqtt_topic + "/set")
         self.subscribe_plc_updates()
 
     def subscribe_plc_updates(self) -> None:
@@ -83,7 +83,7 @@ class Attribute:
 
     # Incoming data from MQTT
     def rec_mqtt_data(self, data: str, cb: Callable[[Any], None] | None = None) -> None:
-        res = self.format_message(data, self.type)
+        res = self.format_message(data, self.parsed_plc_address.dtype)
         if res[0] == 0:
             self.write_to_plc_fn(res[1])
             if cb:
@@ -94,7 +94,7 @@ class Attribute:
 
     def write_to_plc_fn(self, value: Any) -> None:
         self.last_set_data = value
-        self.plc_handler.write_item(self.mqtt_device_topic, value)
+        self.plc_handler.write_item(self.full_mqtt_topic, value)
 
     def format_message(self, msg: str, plc_type: str, no_debug_out: bool = True):
         """
