@@ -1,4 +1,4 @@
-import asyncio, logging
+import asyncio
 import yaml
 from typing import Dict
 
@@ -52,7 +52,6 @@ async def main(config_path: str = "config.yaml") -> None:
 
 
 if __name__ == "__main__":
-    #logging.basicConfig(level=logging.INFO) # Uncomment for debugging 
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
